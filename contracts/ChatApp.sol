@@ -19,14 +19,14 @@ contract BIKCHAT {
     }
 
 //profiles
-    mapping(address => Profile) profiles;
+    mapping(address => Profile) public profiles;
 
 //events
   event ProfileCreation(string _name , string _desc ,string  _img ,address _id);
 
     function createProfile (string memory _name , string memory _desc , string memory _image) external{
 
-        require(profiles[msg.sender].id == address(0) , "Profile already created"); //u can also write profile[msg.sender].id == 0
+        require(profiles[msg.sender].id == address(0) , "Profile already exists"); //u can also write profile[msg.sender].id == 0
 
         Profile memory profile = Profile(_name , msg.sender , _desc , _image) ;
 
@@ -37,6 +37,8 @@ contract BIKCHAT {
     }
 
     function editProfile (string memory _name , string memory _desc , string memory _image ) external {
+        require(msg.sender == profiles[msg.sender].id , "Only dont own any profile");
+
       Profile storage profile = profiles[msg.sender];
      
      if(keccak256(bytes(_name)) != keccak256(bytes(profile.name))) {
