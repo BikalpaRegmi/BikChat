@@ -56,14 +56,52 @@ describe("BikChat", () => {
 
         describe("EditProfile", () => {
             it("Should revert if others try to edit", async () => {
-               await expect(
-                 contract.connect(owner).editProfile("f", "f", "f")
-               ).to.be.revertedWith("Only dont own the profile");
+                await expect(
+                    contract.connect(owner).editProfile("f", "f", "f")
+                ).to.be.revertedWith("Only dont own any profile");
             });
 
-            it("Should update if previous details")ayera bana yo sabai!!!
+            it("Should update if previous details matches", async () => {
+                await contract.connect(addr1).editProfile('BKL', 'Hii i am BKL', 'BKL.png');
+                const resAfterEdit = await contract.profiles(addr1);
+                expect(resAfterEdit.name).to.be.eq("BKL")
+                expect(resAfterEdit.description).to.be.eq("Hii i am BKL");
+                expect(resAfterEdit.image).to.be.eq("BKL.png")
+            })
+        });
+
+        describe("GetProfiles", () => {
+            it("Should provide all the profiles", async () => {
+                const profiles = await contract.getAllProfiles();
+
+                expect(profiles[0].name).to.eq(name);
+                expect(profiles[1].name).to.eq(name2);
+                expect(profiles[1].image).to.eq(image2);
+            });
         })
     });
-
-
+    describe("addToContact", () => {
+        it("Should assign true if add to contact", async () => {
+            await contract.connect(addr1).addToContact(addr2);
+            const contact = await contract.contacts(addr1, addr2);
+            expect(contact).to.eq(true);
+        });
+        it("Should revert if added urself", async () => {
+            await expect(
+                contract.connect(addr2).addToContact(addr2)
+            ).to.be.revertedWith("You cant add urself");
+        });
+        it("Should revert if profile alreadt exist", async () => {
+            await contract.connect(addr1).addToContact(addr2);
+            
+            await expect(
+                 contract.connect(addr1).addToContact(addr2)
+            ).to.be.revertedWith("The profile already exists");
+        });
+        it("Should revert if u dont own any profile", async () => {
+            await expect(contract.addToContact(addr2)).to.be.revertedWith(
+              "Only dont own any profile"
+            );
+        })
+})
 }) 
