@@ -80,28 +80,51 @@ describe("BikChat", () => {
             });
         })
     });
-    describe("addToContact", () => {
-        it("Should assign true if add to contact", async () => {
-            await contract.connect(addr1).addToContact(addr2);
-            const contact = await contract.contacts(addr1, addr2);
-            expect(contact).to.eq(true);
-        });
-        it("Should revert if added urself", async () => {
-            await expect(
-                contract.connect(addr2).addToContact(addr2)
-            ).to.be.revertedWith("You cant add urself");
-        });
-        it("Should revert if profile alreadt exist", async () => {
+    describe("Contact", () => {
+        
+        describe("addToContact", () => {
+            it("Should assign true if add to contact", async () => {
+                await contract.connect(addr1).addToContact(addr2);
+                const contact = await contract.contacts(addr1, addr2);
+                expect(contact).to.eq(true);
+            });
+            it("Should revert if added urself", async () => {
+                await expect(
+                    contract.connect(addr2).addToContact(addr2)
+                ).to.be.revertedWith("You cant add urself");
+            });
+            it("Should revert if profile alreadt exist", async () => {
             await contract.connect(addr1).addToContact(addr2);
             
             await expect(
-                 contract.connect(addr1).addToContact(addr2)
+                contract.connect(addr1).addToContact(addr2)
             ).to.be.revertedWith("The profile already exists");
         });
         it("Should revert if u dont own any profile", async () => {
             await expect(contract.addToContact(addr2)).to.be.revertedWith(
-              "Only dont own any profile"
+                "Only dont own any profile"
             );
+        })
+        })
+        describe('RemoveContact', () => {
+            it("Should delete a person from contact", async () => {
+                await contract.connect(addr1).addToContact(addr2);
+                expect(await contract.contacts(addr1, addr2)).to.eq(true);
+                await contract.connect(addr1).deleteContact(addr2);
+                expect(await contract.contacts(addr1, addr2)).to.eq(false);
+            });
+            it("Should revert if u dont own any profile", async () => {
+                await expect(contract.addToContact(addr2)).to.be.revertedWith(
+                    "Only dont own any profile"
+                );
+            });
+            it("Should revert if a person is not in contact", async () => {
+                await expect(
+                    contract.connect(addr2).deleteContact(addr1)
+                ).to.be.revertedWith(
+                    "You can only remove if the person is already on contact"
+                );
+            });
         })
 })
 }) 

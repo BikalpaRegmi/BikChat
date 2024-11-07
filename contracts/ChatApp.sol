@@ -18,6 +18,23 @@ contract BIKCHAT {
        string image ;
     }
 
+struct Messages{
+string text ;
+uint time;
+address sender;
+}
+
+    struct Chat {
+bool isGroupChat;
+address[] members;
+string chatName;
+Messages[] messages;
+string latestMessage;
+address admin;
+string gcPic;
+    }
+
+
 //profiles
     mapping(address => Profile) public profiles;
     address[] public profileAddress;
@@ -61,13 +78,17 @@ contract BIKCHAT {
      }
     }
 
-   
-
     function addToContact (address _profileToBeAdded) external {
                 require(msg.sender == profiles[msg.sender].id , "Only dont own any profile");
         require(!contacts[msg.sender][_profileToBeAdded] , "The profile already exists");
 require(_profileToBeAdded != msg.sender , 'You cant add urself');
 contacts[msg.sender][_profileToBeAdded] =true;
+    }
+
+    function deleteContact(address _profileToBeDeleted) external {
+require(contacts[msg.sender][_profileToBeDeleted]==true , 'You can only remove if the person is already on contact');
+                require(msg.sender == profiles[msg.sender].id , "Only dont own any profile");
+contacts[msg.sender][_profileToBeDeleted] = false ;
     }
 
   function getAllProfiles() external view returns(Profile[] memory){
@@ -78,6 +99,15 @@ contacts[msg.sender][_profileToBeAdded] =true;
        }
        return allprofiles ;
     }
+/*bool isGroupChat;
+address[] members;
+string chatName;
+Messages[] messages;
+string latestMessage;
+address admin;
+string gcPic; */
 
-
+  function startChat(address _id) external{
+  }
+   
 }
