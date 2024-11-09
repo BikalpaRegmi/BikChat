@@ -57,8 +57,10 @@ describe("BikChat", () => {
         describe("EditProfile", () => {
             it("Should revert if others try to edit", async () => {
                 await expect(
-                    contract.connect(owner).editProfile("f", "f", "f")
-                ).to.be.revertedWith("Only dont own any profile");
+                  contract.connect(owner).editProfile("f", "f", "f")
+                ).to.be.revertedWith(
+                  "You dont own any profile plz create a profile to continue"
+                );
             });
 
             it("Should update if previous details matches", async () => {
@@ -94,17 +96,17 @@ describe("BikChat", () => {
                 ).to.be.revertedWith("You cant add urself");
             });
             it("Should revert if profile alreadt exist", async () => {
-            await contract.connect(addr1).addToContact(addr2);
+                await contract.connect(addr1).addToContact(addr2);
             
-            await expect(
-                contract.connect(addr1).addToContact(addr2)
-            ).to.be.revertedWith("The profile already exists");
-        });
-        it("Should revert if u dont own any profile", async () => {
-            await expect(contract.addToContact(addr2)).to.be.revertedWith(
-                "Only dont own any profile"
-            );
-        })
+                await expect(
+                    contract.connect(addr1).addToContact(addr2)
+                ).to.be.revertedWith("The profile already exists");
+            });
+            it("Should revert if u dont own any profile", async () => {
+                await expect(contract.addToContact(addr2)).to.be.revertedWith(
+                  "You dont own any profile plz create a profile to continue"
+                );
+            })
         })
         describe('RemoveContact', () => {
             it("Should delete a person from contact", async () => {
@@ -115,7 +117,7 @@ describe("BikChat", () => {
             });
             it("Should revert if u dont own any profile", async () => {
                 await expect(contract.addToContact(addr2)).to.be.revertedWith(
-                    "Only dont own any profile"
+                  "You dont own any profile plz create a profile to continue"
                 );
             });
             it("Should revert if a person is not in contact", async () => {
@@ -126,5 +128,32 @@ describe("BikChat", () => {
                 );
             });
         })
-})
+    });
+    describe("Chat", () => {
+        describe("StartChat", () => {
+            it('Should revert if the person is not in contact', async () => {
+                await expect(
+                  contract.connect(addr1).startChat(addr2, "hii")
+                ).to.be.revertedWith(
+                  "The person is not in ur contact"
+                );
+            });
+            it('Should revert if the person didnt created any profile', async () => {
+                await expect(
+                  contract.connect(owner).startChat(addr2, "hii")
+                ).to.be.revertedWith(
+                  "You dont own any profile plz create a profile to continue"
+                );
+            });
+            it("Should make details of chat available", async () => {
+                await contract.connect(addr1).addToContact(addr2);
+                await contract.connect(addr2).startChat(addr1, 'hii addr1');
+                const res: any = await contract.connect(addr2).getIndividualChat(addr1);
+                expect(res.latestMessage).to.eq('hii addr1');
+                expect(res.members[0]).to.eq(addr2);
+                expect(res.members[1]).to.eq(addr1);
+                expect(res.messages[0].sender).to.eq(addr2);
+            });
+        });
+    });
 }) 

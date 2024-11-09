@@ -25,15 +25,18 @@ address sender;
 }
 
     struct Chat {
-bool isGroupChat;
-address[] members;
+address[2] members;
+Messages[] messages;
+string latestMessage;
+    }
+
+struct GroupChat {
 string chatName;
 Messages[] messages;
 string latestMessage;
 address admin;
 string gcPic;
-    }
-
+}
 
 //profiles
     mapping(address => Profile) public profiles;
@@ -42,10 +45,17 @@ string gcPic;
     //contacts
     mapping(address=>mapping(address=>bool)) public contacts;    
 
+    //Chats
+    mapping(address=>mapping (address => Chat)) public indChats ;
+
 //events
   event ProfileCreation(string _name , string _desc ,string  _img ,address _id);
 
-    function createProfile (string memory _name , string memory _desc , string memory _image) external{
+modifier shouldOwnProfile(){
+    require(profiles[msg.sender].id == msg.sender , "You dont own any profile plz create a profile to continue");
+    _;
+}
+    function createProfile (string memory _name , string memory _desc , string memory _image) external {
 
         require(profiles[msg.sender].id == address(0) , "Profile already exists"); //u can also write profile[msg.sender].id == 0
 
@@ -59,8 +69,7 @@ string gcPic;
         
     }
 
-    function editProfile (string memory _name , string memory _desc , string memory _image ) external {
-        require(msg.sender == profiles[msg.sender].id , "Only dont own any profile");
+    function editProfile (string memory _name , string memory _desc , string memory _image ) external shouldOwnProfile{
 
       Profile storage profile = profiles[msg.sender];
      
@@ -78,20 +87,19 @@ string gcPic;
      }
     }
 
-    function addToContact (address _profileToBeAdded) external {
-                require(msg.sender == profiles[msg.sender].id , "Only dont own any profile");
+    function addToContact (address _profileToBeAdded) external shouldOwnProfile{
         require(!contacts[msg.sender][_profileToBeAdded] , "The profile already exists");
 require(_profileToBeAdded != msg.sender , 'You cant add urself');
 contacts[msg.sender][_profileToBeAdded] =true;
+contacts[_profileToBeAdded][msg.sender] = true;
     }
 
-    function deleteContact(address _profileToBeDeleted) external {
+    function deleteContact(address _profileToBeDeleted) external shouldOwnProfile{
 require(contacts[msg.sender][_profileToBeDeleted]==true , 'You can only remove if the person is already on contact');
-                require(msg.sender == profiles[msg.sender].id , "Only dont own any profile");
 contacts[msg.sender][_profileToBeDeleted] = false ;
     }
 
-  function getAllProfiles() external view returns(Profile[] memory){
+  function getAllProfiles() external view returns(Profile[] memory) {
        Profile[] memory allprofiles = new Profile[](profileAddress.length);
 
        for(uint i=0 ; i<profileAddress.length ; i++){
@@ -99,15 +107,24 @@ contacts[msg.sender][_profileToBeDeleted] = false ;
        }
        return allprofiles ;
     }
-/*bool isGroupChat;
-address[] members;
-string chatName;
-Messages[] messages;
-string latestMessage;
-address admin;
-string gcPic; */
 
-  function startChat(address _id) external{
+  function startChat(address _id , string memory _msg) external shouldOwnProfile{
+    require(contacts[msg.sender][_id]==true , "The person is not in ur contact");
+    require(_id != msg.sender , 'u cnt msg urslf');
+    Chat storage strtCht = indChats[msg.sender][_id];
+    strtCht.members[0] = msg.sender ;
+    strtCht.members[1] = _id ;
+strtCht.latestMessage = _msg ;
+Messages memory newMsg = Messages({
+    text:_msg,
+    time:block.timestamp,
+    sender:msg.sender
+});
+strtCht.messages.push(newMsg);
+  }
+
+  function getIndividualChat(address _id) external view returns (Chat memory){
+   return indChats[msg.sender][_id];
   }
    
 }
