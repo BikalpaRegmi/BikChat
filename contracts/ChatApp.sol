@@ -47,6 +47,7 @@ string gcPic;
 
     //Chats
     mapping(address=>mapping (address => Chat)) public indChats ;
+    mapping(address=>address[]) chatPartners;
 
 //events
   event ProfileCreation(string _name , string _desc ,string  _img ,address _id);
@@ -111,20 +112,28 @@ contacts[msg.sender][_profileToBeDeleted] = false ;
   function startChat(address _id , string memory _msg) external shouldOwnProfile{
     require(contacts[msg.sender][_id]==true , "The person is not in ur contact");
     require(_id != msg.sender , 'u cnt msg urslf');
+
     Chat storage strtCht = indChats[msg.sender][_id];
     strtCht.members[0] = msg.sender ;
     strtCht.members[1] = _id ;
-strtCht.latestMessage = _msg ;
+    strtCht.latestMessage = _msg ;
+
 Messages memory newMsg = Messages({
     text:_msg,
     time:block.timestamp,
     sender:msg.sender
 });
+
 strtCht.messages.push(newMsg);
+chatPartners[msg.sender].push(_id);
+chatPartners[_id].push(msg.sender);
   }
 
   function getIndividualChat(address _id) external view returns (Chat memory){
    return indChats[msg.sender][_id];
   }
-   
+
+function getAllChats() external view returns (Chat[] memory){
+    
 }
+  }
