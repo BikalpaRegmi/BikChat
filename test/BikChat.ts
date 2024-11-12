@@ -155,5 +155,30 @@ describe("BikChat", () => {
                 expect(res.messages[0].sender).to.eq(addr2);
             });
         });
+        describe('GetAllChats & messages', () => {
+            it('Should provide All chat if called', async () => {
+                await contract.connect(addr1).addToContact(addr2);
+                await contract.connect(addr2).startChat(addr1, "hii addr1");
+                const res = await contract.connect(addr1).getAllChats();
+                const res2 = await contract.connect(addr2).getAllChats();
+                expect(res[0].members[0]).to.eq(addr2);
+                expect(res2[0].members[1]).to.eq(addr1);
+            });
+           it("Should provide all the messages when called", async () => {
+             await contract.connect(addr1).addToContact(addr2);
+             await contract.connect(addr1).startChat(addr2, "hola addr2");
+             await contract.connect(addr2).startChat(addr1, "How u doin addr1");
+
+             const res = await contract.connect(addr1).getAllMessage(addr2);
+             const res1 = await contract.connect(addr2).getAllMessage(addr1);
+
+               expect(res[0].text).to.eq("hola addr2");
+               expect(res1[0].text).to.eq("hola addr2");
+               expect(res[1].text).to.eq("How u doin addr1");
+               expect(res1[1].text).to.eq("How u doin addr1");
+           });
+          
+
+        });
     });
 }) 

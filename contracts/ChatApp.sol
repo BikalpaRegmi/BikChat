@@ -46,8 +46,9 @@ string gcPic;
     mapping(address=>mapping(address=>bool)) public contacts;    
 
     //Chats
-    mapping(address=>mapping (address => Chat)) public indChats ;
-    mapping(address=>address[]) chatPartners;
+    mapping(address=>mapping(address=>Chat)) public indChats;
+    mapping (address=>address[]) chatPartners;
+    
 
 //events
   event ProfileCreation(string _name , string _desc ,string  _img ,address _id);
@@ -124,7 +125,12 @@ Messages memory newMsg = Messages({
     sender:msg.sender
 });
 
+indChats[_id][msg.sender] = strtCht;
+
 strtCht.messages.push(newMsg);
+indChats[_id][msg.sender].messages.push(newMsg);
+
+
 chatPartners[msg.sender].push(_id);
 chatPartners[_id].push(msg.sender);
   }
@@ -134,6 +140,35 @@ chatPartners[_id].push(msg.sender);
   }
 
 function getAllChats() external view returns (Chat[] memory){
-    
-}
+  uint chatPartnerLength = chatPartners[msg.sender].length ;
+  Chat[] memory chats = new Chat[](chatPartnerLength);
+
+  for(uint i=0 ; i<chatPartnerLength ; i++){
+    address partner = chatPartners[msg.sender][i];
+chats[i] = indChats[msg.sender][partner];
   }
+  return chats;
+}
+
+function getAllMessage(address _id) external view returns (Messages[] memory){
+    Chat memory indCht = indChats[msg.sender][_id];
+    uint msgcount = indCht.messages.length;
+    Messages[] memory messages = new Messages[](msgcount);
+
+    for(uint i=0 ; i<msgcount ;i++){
+        messages[i] = indCht.messages[i];
+    }
+    return messages;
+}
+
+function sendMessage(string memory _text , address _to) external {
+    Chat storage chat = indChats[msg.sender][_to];
+
+    Messages memory message = Messages({
+        text:_text,
+time:block.timestamp,
+sender:msg.sender
+    });
+    chat.messages.push(message);
+}
+  }sabai vayo aba aayexi group chat matra banauna baki xa majja le bana 
