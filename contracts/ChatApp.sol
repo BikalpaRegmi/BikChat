@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
 pragma solidity 0.8.27;
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract BIKCHAT {
+        using Strings for address ;
 
     address public owner;
      string public name ;
@@ -31,8 +33,10 @@ string latestMessage;
     }
 
 struct GroupChat {
+    string id ;
 string chatName;
 Messages[] messages;
+address[] members;
 string latestMessage;
 address admin;
 string gcPic;
@@ -47,8 +51,12 @@ string gcPic;
 
     //Chats
     mapping(address=>mapping(address=>Chat)) public indChats;
-    mapping (address=>address[]) chatPartners;
+    mapping (address=>address[]) private chatPartners;
     
+    //Group chats
+    mapping(string=>GroupChat) public groupChats;
+    mapping(address=>string[]) public userGroupChats;
+
 
 //events
   event ProfileCreation(string _name , string _desc ,string  _img ,address _id);
@@ -170,5 +178,135 @@ time:block.timestamp,
 sender:msg.sender
     });
     chat.messages.push(message);
+    chat.latestMessage = _text;
+    
 }
-  }sabai vayo aba aayexi group chat matra banauna baki xa majja le bana 
+
+//2 b tstd
+  function createGroupChat(address[] memory _peoples , string memory _name , string memory _id) external shouldOwnProfile{
+    GroupChat storage gc = groupChats[_id] ;
+    gc.admin = msg.sender;
+    gc.chatName = _name;
+    gc.members = _peoples;
+    gc.latestMessage = string(abi.encodePacked(msg.sender.toHexString() , 'Created the group'));
+
+    for(uint i=0 ; i<_peoples.length ; i++){
+        userGroupChats[_peoples[i]].push(_id);
+    }
+        userGroupChats[msg.sender].push(_id);
+  }
+
+  function editGroup(string memory _chtName , string memory _pic , string memory _id) external {
+GroupChat storage gc = groupChats[_id];
+bool isMember = false ;
+
+for(uint i=0 ; i<gc.members.length ; i++){
+ if(gc.members[i]==msg.sender) isMember = true;
+}
+require(isMember , "U need to be member to edit grp info");
+
+gc.chatName = _chtName;
+gc.gcPic = _pic;
+  }
+
+  function deleteUserGrpCht(string memory _id , address _rmMember) internal {
+    uint length = userGroupChats[_rmMember].length;
+    for(uint i=0 ; i<length ; i++){
+    if(keccak256(abi.encodePacked(userGroupChats[_rmMember][i])) == keccak256(abi.encodePacked(_id))){
+     userGroupChats[_rmMember][i] = userGroupChats[_rmMember][length-1];
+     userGroupChats[_rmMember].pop();
+     break;
+    }
+    }
+  }
+
+function addMember(address _newMem , string memory _id) external {
+    GroupChat storage gc = groupChats[_id] ;
+    require(gc.admin == msg.sender , 'only admin can add and remove a member');
+    gc.members.push(_newMem);
+    userGroupChats[_newMem].push(_id);
+}
+
+function removeMember(address _rmMber , string memory _id ) external {
+    GroupChat storage gc = groupChats[_id];
+    require(gc.admin == msg.sender , 'Only admin can add or delete a user');
+    uint gcMemberCount = gc.members.length;
+
+    for(uint i=0 ; i<gcMemberCount ; i++){
+     if(gc.members[i] == _rmMber){
+        gc.members[i] = gc.members[gcMemberCount-1];
+        gc.members.pop();
+        deleteUserGrpCht(_id , _rmMber);
+        break;
+     }
+    }
+}
+
+function leaveGroup(string memory _id) external {
+    GroupChat storage gc = groupChats[_id];
+    uint gcMemCnt = gc.members.length;
+ bool isMem = false;
+uint indexToRemove ;
+
+    for(uint i=0 ; i<gcMemCnt ; i++) {
+       if(gc.members[i]==msg.sender){
+        isMem = true;
+        indexToRemove = i;
+        deleteUserGrpCht(_id , msg.sender);
+        break;
+       }
+    }
+    
+    if(isMem){
+     gc.members[indexToRemove] = gc.members[gcMemCnt-1];
+     gc.members.pop();
+    }
+}
+
+function addMessage (string memory _text , string memory _id) external {
+GroupChat storage gc = groupChats[_id];
+
+Messages memory mssg = Messages({
+text : _text,
+time:block.timestamp,
+sender:msg.sender
+});
+
+gc.messages.push(mssg);
+
+}
+
+function getAllGroupChats() external view returns (GroupChat[] memory) {
+ uint length = userGroupChats[msg.sender].length;
+ GroupChat[] memory gcs = new GroupChat[](length);
+
+ for(uint i=0 ; i<length ; i++){
+   string memory ids = userGroupChats[msg.sender][i];
+   gcs[i] = groupChats[ids];
+ }
+ return gcs ;
+}
+
+function deleteGroup(string memory _id) external {
+GroupChat storage gc = groupChats[_id];
+require(gc.admin == msg.sender , 'only admin can delete group');
+
+for(uint i=0 ; i<gc.members.length ; i++){
+    address member = gc.members[i];
+   deleteUserGrpCht(_id , member);
+}
+delete groupChats[_id];
+}
+
+function getAllMessageOfGroup(string memory _id) external view returns (Messages[] memory){
+    uint length = groupChats[_id].messages.length;
+ Messages[] memory mssg = new Messages[](length);
+
+ for(uint i=0 ; i<length ; i++){
+    mssg[i] = groupChats[_id].messages[i];
+ }
+ return mssg;
+}
+  }
+
+

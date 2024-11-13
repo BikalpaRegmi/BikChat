@@ -129,7 +129,7 @@ describe("BikChat", () => {
             });
         })
     });
-    describe("Chat", () => {
+    describe("IndividualChats", () => {
         describe("StartChat", () => {
             it('Should revert if the person is not in contact', async () => {
                 await expect(
@@ -181,4 +181,9 @@ describe("BikChat", () => {
 
         });
     });
+    describe("GroupChat", () => {
+        beforeEach(async () => {
+            await contract.createProfile()
+        })
+    })
 }) 
