@@ -182,19 +182,23 @@ sender:msg.sender
     
 }
 
-//2 b tstd
   function createGroupChat(address[] memory _peoples , string memory _name , string memory _id) external shouldOwnProfile{
     GroupChat storage gc = groupChats[_id] ;
+    gc.id = _id ;
     gc.admin = msg.sender;
     gc.chatName = _name;
     gc.members = _peoples;
-    gc.latestMessage = string(abi.encodePacked(msg.sender.toHexString() , 'Created the group'));
+    gc.latestMessage = string(abi.encodePacked(msg.sender.toHexString() , ' Created the group'));
 
     for(uint i=0 ; i<_peoples.length ; i++){
         userGroupChats[_peoples[i]].push(_id);
     }
         userGroupChats[msg.sender].push(_id);
   }
+
+function returnGc(string memory _id) external view returns (GroupChat memory){
+return groupChats[_id];
+}
 
   function editGroup(string memory _chtName , string memory _pic , string memory _id) external {
 GroupChat storage gc = groupChats[_id];
@@ -204,9 +208,12 @@ for(uint i=0 ; i<gc.members.length ; i++){
  if(gc.members[i]==msg.sender) isMember = true;
 }
 require(isMember , "U need to be member to edit grp info");
-
+if(keccak256(bytes(gc.chatName)) != keccak256(bytes(_chtName))){
 gc.chatName = _chtName;
+}
+if(keccak256(bytes(gc.gcPic)) != keccak256(bytes(_pic))){
 gc.gcPic = _pic;
+}
   }
 
   function deleteUserGrpCht(string memory _id , address _rmMember) internal {
@@ -223,6 +230,13 @@ gc.gcPic = _pic;
 function addMember(address _newMem , string memory _id) external {
     GroupChat storage gc = groupChats[_id] ;
     require(gc.admin == msg.sender , 'only admin can add and remove a member');
+    bool alreadyMember = false ;
+    for(uint i=0;i<gc.members.length ; i++){
+        if(gc.members[i]==_newMem){
+            alreadyMember=true;
+        }
+    }
+    require(alreadyMember == false , 'The member is already added');
     gc.members.push(_newMem);
     userGroupChats[_newMem].push(_id);
 }

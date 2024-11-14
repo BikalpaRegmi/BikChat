@@ -183,7 +183,66 @@ describe("BikChat", () => {
     });
     describe("GroupChat", () => {
         beforeEach(async () => {
-            await contract.createProfile()
+            await contract.createProfile('Owner', 'Ola i am Owner', 'owner.png');
+            await contract.createGroupChat([addr1.getAddress(), addr2.getAddress()], 'Guff', '1');
+            await contract.connect(addr2).createGroupChat([owner.getAddress()], 'Ntg', '3');
+        });
+
+        describe('createGrp', () => {     
+            it("Should add the details on groupChats", async () => {
+                const res = await contract.returnGc('1');
+                expect(res.latestMessage).to.eq(`${(await owner.getAddress()).toLowerCase()} Created the group`);
+                expect(res.members[0]).to.eq(await addr1.getAddress());
+            });
+
+            it("Should add to userGroupChats", async () => {
+                const res = await contract.userGroupChats(owner,0);
+           expect(res[0]).to.eq("1");
+            });
+
+        });
+        
+        describe('editGroup',  () => {
+            it("Should edit the groupChat", async () => {
+                await contract.editGroup('lol', 'img.png', '3');
+                const res = await contract.returnGc('3');
+                expect(res.chatName).to.eq('lol');
+                expect(res.gcPic).to.eq('img.png');
+            });
+
+            it('Should revert if not a member', async () => {
+                await expect(
+                    contract.connect(addr1).editGroup("", "", "3")
+                ).to.be.revertedWith("U need to be member to edit grp info");
+            });
+
+            it("Should add a member", async () => {
+                const resBefore = await contract.returnGc("3");
+                expect(resBefore.members.length).to.eq(1);
+                await contract.connect(addr2).addMember(addr1, '3');
+                const res = await contract.returnGc('3');
+                expect(res.members.length).to.eq(2);
+                await expect(
+                  contract.connect(addr2).addMember(addr1, "3")
+                ).to.be.revertedWith("The member is already added");
+            });
+
+            it("Should remove member when admin wants", async () => {
+                await contract.removeMember(addr1, '1');
+                const res = await contract.returnGc('1');
+                expect(res.members.length).to.eq(1);
+                expect(res.members[0]).to.eq(addr2);
+            });
+
+            it("Should let the member to leave group", async () => {
+                await contract.connect(addr2).leaveGroup('1');
+                const res = await contract.returnGc('1');
+                expect(res.members[0]).to.eq(addr1);
+                expect(res.members.length).to.eq(1);
+            });
+        })
+        describe('Group Messages and Group Chats', () => {
+            it("Should")
         })
     })
 }) 
