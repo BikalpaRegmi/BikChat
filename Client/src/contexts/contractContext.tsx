@@ -4,8 +4,10 @@ import {
   Dispatch,
   SetStateAction,
   useContext,
+  useEffect,
   useState,
 } from "react";
+import abi from "../bytecode/abi.json";
 
 interface ContractStateType {
   signer: ethers.Signer | null;
@@ -29,7 +31,49 @@ export const EthereumContextProvider = ({ children }: any) => {
       account: null,
       setState: () => {},
   });
-   
+
+   const template = async () => {
+     const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+     const contractAbi = abi.abi;
+
+     if (window.ethereum) {
+       try {
+         const accounts: string[] = await window.ethereum.request({
+           method: "eth_requestAccounts",
+         });
+
+         window.ethereum.on('accountsChanged', () => {
+           window.location.reload();
+         })
+
+           const provider = new ethers.BrowserProvider(window.ethereum);
+           const signer = await provider.getSigner();
+           const contract = new ethers.Contract(
+             contractAddress,
+             contractAbi,
+             signer
+           );
+
+
+           setState((prev) => ({
+             ...prev,
+             signer,
+             provider,
+             contract,
+             account: accounts[0],
+           }));
+        
+       } catch (error) {
+         console.error("Error connecting MetaMask:", error);
+       }
+     } else {
+       console.log("MetaMask is not installed.");
+     }
+   };
+  
+  useEffect(() => {
+    template();
+  },[])
   
   return (
     <EthereumContext.Provider value={ {...state , setState} }>
