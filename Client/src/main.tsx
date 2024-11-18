@@ -3,14 +3,16 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import { EthereumContextProvider } from './contexts/contractContext.tsx'
 import { BrowserRouter } from 'react-router-dom'
+import { MyDataProvider } from './contexts/myDataContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    
-    <EthereumContextProvider>
       <BrowserRouter>
+    <EthereumContextProvider>
+      <MyDataProvider>
     <App />
-      </BrowserRouter>
+      </MyDataProvider>
     </EthereumContextProvider>
+      </BrowserRouter>
   </StrictMode>,
 )

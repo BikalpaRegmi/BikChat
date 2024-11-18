@@ -1,50 +1,37 @@
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import './App.css'
 import SighUp from './pages/auth'
 import { useEthereum } from './contexts/contractContext';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import HomePage from './pages/home';
+import MyProfile from './pages/myProfiles';
+import Contacts from './pages/contacts';
+import Profile from './pages/Profile';
+import { useMyData } from './contexts/myDataContext';
 
-interface myProfileType {
-  name: string,
-  id: string,
-  description: string,
-  image : string ,
-}
 
 function App() {
-  const [myData, setMyData] = useState<myProfileType | undefined>(undefined);
-  const { contract, account } = useEthereum();
+  const {  account } = useEthereum();
+  const { id } = useMyData();
   const navigate = useNavigate();
-
-  const getMyProfile = async () => {
-    const res = await contract?.profiles(account);
-    setMyData(res);
-    console.log(res)
-  }
-  const getAllData = async () => {
-    const res = await contract?.getAllProfiles();
-    console.log(res);
-  }
-  
-  useEffect(() => {
-    getMyProfile();
-    getAllData();
-  }, [contract , account]);
+ 
 
   useEffect(() => {
-    if ( (myData && myData?.id.toLowerCase()) !== account?.toLowerCase()) {
+    if ( (id?.toLowerCase()) !== account?.toLowerCase()) {
       navigate('/auth');
     }
-  },[ myData])
+  },[ id,account])
   
   return (
     <>    
       
       <Routes>
         <Route path='/' element={<HomePage/>} />
-        <Route path='/auth' element={<SighUp/>} />
+        <Route path='/auth' element={<SighUp />} />
+        <Route path='/account' element={<MyProfile />} />
+        <Route path='/Profile/:id' element={<Profile />} />
+        <Route path='/contacts' element={ <Contacts/>} />
       </Routes>
     </>
   )

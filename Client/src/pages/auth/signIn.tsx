@@ -62,7 +62,7 @@ const SignINComponent = () => {
     }
 
     const transaction = await contract?.createProfile(
-updatedDetails.name , updatedDetails.description, updatedDetails.description
+updatedDetails.name , updatedDetails.description, updatedDetails.image
     );
 
     await transaction.wait();
