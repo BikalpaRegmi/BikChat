@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { IoPersonRemove } from "react-icons/io5";
 import { useEthereum } from "../../contexts/contractContext";
-import { useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 interface DataType {
   name: string | null;
@@ -14,12 +14,19 @@ const Contacts = () => {
   const [datas, setDatas] = useState<DataType[]>();
   const { contract } = useEthereum();
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const getContacts = async () => {
     try {
       const res = await contract?.getAllProfiles();
-      const myContacts = res.filter(async (curval: any) => await contract?.contacts(id, curval.id));
-      setDatas(myContacts);
+
+      const contacts: DataType[] = [];
+
+      for (const profile of res) {
+        const isContact: boolean = await contract?.contacts(id, profile.id);
+        if (isContact) contacts.push(profile);
+      }
+      setDatas(contacts);
     } catch (error) {
       console.log(error)
     }
@@ -27,7 +34,7 @@ const Contacts = () => {
 
   useEffect(() => {
     getContacts();
-  }, []);
+  }, [id]);
   return (
     <div>
       <div>
@@ -35,29 +42,35 @@ const Contacts = () => {
           <div className="container px-5 py-24 mx-auto">
             <div className="flex flex-col text-center w-full mb-20">
               <h1 className="sm:text-3xl text-2xl font-medium title-font mb-4 text-green-300">
-                 Contacts
+                Contacts
               </h1>
             </div>
-            <div className="flex flex-wrap -m-2">
-              <div className="p-2 lg:w-1/3 md:w-1/2 w-full">
-                <div className="h-full flex items-center border-gray-200 border p-4 rounded-lg">
-                  <img
-                    alt="team"
-                    className="w-16 h-16 bg-gray-100 object-cover object-center flex-shrink-0 rounded-full mr-4"
-                    src="https://dummyimage.com/80x80"
-                  />
-                  <div className="flex-grow">
-                    <h2 className="text-yellow-300 flex gap-5  title-font font-medium">
-                      Holden Caulfield{" "}
-                      <IoPersonRemove className=" cursor-pointer text-red-500 hover:text-[23px] text-xl" />
-                    </h2>
-                    <p className="text-yellow-500">
-                      Lorem ipsum dolor sit amet ...
-                    </p>
+            {datas?.map((curval: DataType) => {
+              return (
+                <div className="flex flex-wrap -m-2">
+                  <div className="p-2 lg:w-1/3 md:w-1/2 w-full">
+                    <div className="h-full flex items-center border-gray-200 border p-4 rounded-lg">
+                      
+                      <img
+                        alt="team"
+                        className="w-16 h-16 bg-gray-100 object-cover object-center flex-shrink-0 rounded-full mr-4"
+                        src={curval.image!}
+                        onClick={() => { navigate(`/Profile/${curval.id}`); }}
+                        />
+                        
+                      <div className="flex-grow">
+                        <h2 className="text-yellow-300 flex gap-5  title-font font-medium">
+                         {curval.name}
+                        </h2>
+                        <p className="text-yellow-500">
+                          {curval.description?.slice(0,16)}...
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              );
+            })}
           </div>
         </section>
       </div>

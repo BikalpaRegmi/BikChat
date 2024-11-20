@@ -30,7 +30,7 @@ const Profile = () => {
 
   useEffect(() => {
     getDetail();
-  }, [contract]);
+  }, [contract , id]);
   return (
     <div>
       <NavBar />

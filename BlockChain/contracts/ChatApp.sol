@@ -147,13 +147,13 @@ chatPartners[_id].push(msg.sender);
    return indChats[msg.sender][_id];
   }
 
-function getAllChats() external view returns (Chat[] memory){
+function getAllChats() external view returns (Profile[] memory){
   uint chatPartnerLength = chatPartners[msg.sender].length ;
-  Chat[] memory chats = new Chat[](chatPartnerLength);
+  Profile[] memory chats = new Profile[](chatPartnerLength);
 
   for(uint i=0 ; i<chatPartnerLength ; i++){
     address partner = chatPartners[msg.sender][i];
-chats[i] = indChats[msg.sender][partner];
+   chats[i] = profiles[partner];
   }
   return chats;
 }
@@ -178,6 +178,8 @@ time:block.timestamp,
 sender:msg.sender
     });
     chat.messages.push(message);
+    indChats[_to][msg.sender].messages.push(message);
+    
     chat.latestMessage = _text;
     
 }

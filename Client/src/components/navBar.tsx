@@ -20,7 +20,7 @@ const NavBar = () => {
                 className=" hover:text-indigo-700 px-1 md:px-5 cursor-pointer text-black py-2 rounded-md bg-sky-300 md:text-md font-medium"
                 onClick={() => navigate("/contacts")}
               >
-                Contacts
+                Add Contacts
               </a>
               <a
                 className="text-gray-800 cursor-pointer bg-indigo-100 hover:bg-indigo-200 inline-flex items-center justify-center px-3 py-2 border border-transparent text-md font-medium rounded-md shadow-sm "

@@ -18,11 +18,9 @@ const SighUp = () => {
   const getMyProfile = async () => {
     const res = await contract?.profiles(account);
     setMyData(res);
-    console.log(res);
   };
   const getAllData = async () => {
-    const res = await contract?.getAllProfiles();
-    console.log(res);
+     await contract?.getAllProfiles();
   };
 
   useEffect(() => {

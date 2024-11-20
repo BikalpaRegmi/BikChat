@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { IoPersonRemove } from "react-icons/io5";
-import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useEthereum } from "../../contexts/contractContext";
+import { IoChatbox } from "react-icons/io5";
+
 
 interface DataType {
   name: string | null;
@@ -13,7 +15,8 @@ interface DataType {
 const MyContacts = () => {
     const [datas, setDatas] = useState<DataType[]>();
     const { contract ,account } = useEthereum();
-
+  const navigate = useNavigate();
+  
     const getContacts = async () => {
       try {
         const res = await contract?.getAllProfiles();
@@ -29,6 +32,15 @@ const MyContacts = () => {
         console.log(error);
       }
     };
+  
+  const handleStartConversation = async (id:string) => {
+    try {
+      await contract?.startChat(id, 'Initiated Conversation');
+      window.location.href = '/';
+    } catch (error) {
+      console.log(error)
+    }
+  }
   
   const handleRemove = async (id:string) => {
     try {
@@ -59,16 +71,22 @@ const MyContacts = () => {
                   <div className="h-full flex items-center border-gray-200 border p-4 rounded-lg">
                     <img
                       alt="team"
-                      className="w-16 h-16 bg-gray-100 object-cover object-center flex-shrink-0 rounded-full mr-4"
+                      title="view profile"
+                      className="w-16 h-16 cursor-pointer bg-gray-100 object-cover object-center flex-shrink-0 rounded-full mr-4"
                       src={curval.image!}
+                      onClick={() => navigate(`/Profile/${curval.id}`)}
                     />
                     <div className="flex-grow">
                       <h2 className="text-yellow-300 flex gap-5  title-font font-medium">
                         {curval.name}
-                        <IoPersonRemove onClick={()=>handleRemove(curval.id)} className=" cursor-pointer text-red-500 hover:text-[23px] text-xl" />
+                        <IoPersonRemove title='Remove Contact'
+                          onClick={() => handleRemove(curval.id)}
+                          className=" cursor-pointer text-red-500 hover:text-[23px] text-xl"
+                        />
+                        <IoChatbox onClick={()=>handleStartConversation(curval.id)} title="start conversation" className="cursor-pointer text-red-500 hover:text-[23px] text-2xl" />
                       </h2>
                       <p className="text-yellow-500">
-                        {curval.description.slice(0,16)}...
+                        {curval.description.slice(0, 16)}...
                       </p>
                     </div>
                   </div>

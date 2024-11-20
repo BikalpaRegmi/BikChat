@@ -1,13 +1,10 @@
-import { useEffect } from "react";
 import { useMyData } from "../../contexts/myDataContext"
 import MyContacts from "./myContacts"
 import NavBar from "../../components/navBar";
 
 const MyProfile = () => {
   const { name, description, image } = useMyData();
-  useEffect(() => {
-    console.log(image);
-  },[])
+  
   return (
     <div>
       <NavBar />
