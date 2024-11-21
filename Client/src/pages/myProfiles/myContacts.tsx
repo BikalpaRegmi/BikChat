@@ -3,7 +3,8 @@ import { IoPersonRemove } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { useEthereum } from "../../contexts/contractContext";
 import { IoChatbox } from "react-icons/io5";
-
+  import { ToastContainer, toast } from "react-toastify";
+  import "react-toastify/dist/ReactToastify.css";
 
 interface DataType {
   name: string | null;
@@ -35,8 +36,13 @@ const MyContacts = () => {
   
   const handleStartConversation = async (id:string) => {
     try {
-      await contract?.startChat(id, 'Initiated Conversation');
-      window.location.href = '/';
+      const partners: string[] = await contract?.getAllPartners();
+      if (partners.includes(id)) {
+        toast.error(`u r already initiated convo with ${id}`);
+      } else {
+        await contract?.startChat(id , 'Initiated conversation');
+      }
+      console.log(partners)
     } catch (error) {
       console.log(error)
     }
@@ -94,7 +100,7 @@ const MyContacts = () => {
               </div>
             );
           })}
-        </div>
+        </div><ToastContainer/>
       </section>
     </div>
   );

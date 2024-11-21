@@ -51,7 +51,7 @@ string gcPic;
 
     //Chats
     mapping(address=>mapping(address=>Chat)) public indChats;
-    mapping (address=>address[]) private chatPartners;
+    mapping (address=>address[]) public chatPartners;
     
     //Group chats
     mapping(string=>GroupChat) public groupChats;
@@ -156,6 +156,9 @@ function getAllChats() external view returns (Profile[] memory){
    chats[i] = profiles[partner];
   }
   return chats;
+}
+function getAllPartners() external view returns(address[] memory){
+    return chatPartners[msg.sender];
 }
 
 function getAllMessage(address _id) external view returns (Messages[] memory){

@@ -14,7 +14,8 @@ interface MyDataType {
 const Profile = () => {
   const [details, setDetails] = useState<MyDataType>();
   const { id } = useParams();
-  const { contract } = useEthereum();
+  const { contract ,account} = useEthereum();
+  const [isPartner, setIsPartner] = useState<boolean>();
 
   const getDetail = async () => {
     try {
@@ -27,10 +28,46 @@ const Profile = () => {
       console.log(error)
     }
   }
+  const checkPartnerOrNot = async () => {
+    try {  
+        const res = await contract?.contacts(account, id)
+      if (res) {
+        setIsPartner(true);
+      }
+      else{
+        setIsPartner(false);
+      }
+      console.log(res)
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
+  const addToContact = async () => {
+  try {
+    await contract?.addToContact(id);
+    setIsPartner(true);
+  } catch (error) {
+    console.log(error)
+  }
+  }
+  
+  const removeFromContact = async () => {
+    try {
+      await contract?.deleteContact(id);
+      setIsPartner(false);
+    } catch (error) {
+      console.log(error)
+    }
+  }
   useEffect(() => {
     getDetail();
-  }, [contract , id]);
+  }, [contract, id]);
+  
+  useEffect(() => {
+    checkPartnerOrNot();
+  }, [isPartner, id]);
+
   return (
     <div>
       <NavBar />
@@ -44,9 +81,20 @@ const Profile = () => {
           <div className="flex flex-col">
             <div className="md:text-justify mb-3">
               <div className="flex flex-col mb-5">
-                <p className="text-lime-300 font-bold text-xl">
-                  {details?.name}
-                </p>
+                <span className="flex gap-5">
+                  <p className="text-lime-300 font-bold text-xl">
+                    {details?.name}
+                  </p>
+                  {!isPartner ? (
+                    <button onClick={addToContact} className="bg-lime-700 hover:font-semibold text-white px-2 font-bold">
+                      Add To Contact
+                    </button>
+                  ) : (
+                    <button onClick={removeFromContact} className="bg-red-700 hover:font-semibold text-white px-2 font-bold">
+                      Remove From Contact
+                    </button>
+                  )}
+                </span>
               </div>
 
               <p className="text-green-500 font-semibold text-center md:text-left">

@@ -1,10 +1,11 @@
 import { useMyData } from "../../contexts/myDataContext"
 import MyContacts from "./myContacts"
 import NavBar from "../../components/navBar";
+import { useNavigate } from "react-router-dom";
 
 const MyProfile = () => {
   const { name, description, image } = useMyData();
-  
+  const navigate = useNavigate();
   return (
     <div>
       <NavBar />
@@ -18,7 +19,11 @@ const MyProfile = () => {
           <div className="flex flex-col">
             <div className="md:text-justify mb-3">
               <div className="flex flex-col mb-5">
-                <p className="text-lime-300 font-bold text-xl">{name}</p>
+                <span className="flex gap-5">
+
+                  <p className="text-lime-300 font-bold text-xl">{name}</p>
+                  <button onClick={()=>navigate(`/editProfile`)} className="bg-yellow-700 py-1 px-3 font-semibold">Edit Profile</button>
+                </span>
               </div>
 
               <p className="text-green-500 font-semibold text-center md:text-left">

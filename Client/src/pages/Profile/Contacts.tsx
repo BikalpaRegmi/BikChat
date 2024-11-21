@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { IoPersonRemove } from "react-icons/io5";
 import { useEthereum } from "../../contexts/contractContext";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 interface DataType {
   name: string | null;
@@ -12,7 +11,7 @@ interface DataType {
 
 const Contacts = () => {
   const [datas, setDatas] = useState<DataType[]>();
-  const { contract } = useEthereum();
+  const { contract,account } = useEthereum();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -55,7 +54,7 @@ const Contacts = () => {
                         alt="team"
                         className="w-16 h-16 bg-gray-100 object-cover object-center flex-shrink-0 rounded-full mr-4"
                         src={curval.image!}
-                        onClick={() => { navigate(`/Profile/${curval.id}`); }}
+                        onClick={() => {account?.toLowerCase()!=curval.id?.toLowerCase() ? navigate(`/Profile/${curval.id}`) :navigate('/account') } }
                         />
                         
                       <div className="flex-grow">

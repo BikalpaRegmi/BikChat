@@ -1,17 +1,18 @@
+import { useState } from "react";
+import GroupChat from "./GrpCht";
+import IndPage from "./IndCht";
 import NavBar from "../../components/navBar";
-import Left from "./Left";
-import Right from "./Right";
 
-const HomePage = () => {
+const Home = () => {
+  const [isGrp, setIsGrp] = useState<boolean>(false);
+
   return (
     <div>
       <NavBar />
-      <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-3 ">
-      <Left/>
-      <Right/>
-      </div>
+
+      {isGrp ? <GroupChat setIsGrp={setIsGrp} /> : <IndPage setIsGrp={setIsGrp } />}
     </div>
   );
-}
+};
 
-export default HomePage
+export default Home;
