@@ -193,7 +193,7 @@ sender:msg.sender
     gc.admin = msg.sender;
     gc.chatName = _name;
     gc.members = _peoples;
-    gc.latestMessage = string(abi.encodePacked(msg.sender.toHexString() , ' Created the group'));
+    gc.latestMessage = string(abi.encodePacked(profiles[msg.sender].name , ' Created the group'));
 
     for(uint i=0 ; i<_peoples.length ; i++){
         userGroupChats[_peoples[i]].push(_id);
@@ -280,6 +280,10 @@ uint indexToRemove ;
      gc.members[indexToRemove] = gc.members[gcMemCnt-1];
      gc.members.pop();
     }
+}
+
+function getIndividualGroupChat(string memory _id) external view returns(GroupChat memory){
+return groupChats[_id];
 }
 
 function addMessage (string memory _text , string memory _id) external {

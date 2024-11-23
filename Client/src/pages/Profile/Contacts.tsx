@@ -41,10 +41,10 @@ const Contacts = () => {
           <div className="container px-5 py-24 mx-auto">
             <div className="flex flex-col text-center w-full mb-20">
               <h1 className="sm:text-3xl text-2xl font-medium title-font mb-4 text-green-300">
-                Contacts
+                Peoples you may know
               </h1>
             </div>
-            {datas?.map((curval: DataType) => {
+            {datas?.filter((curval:any)=>curval.id.toLowerCase()!==account?.toLowerCase()).map((curval: DataType) => {
               return (
                 <div className="flex flex-wrap -m-2">
                   <div className="p-2 lg:w-1/3 md:w-1/2 w-full">

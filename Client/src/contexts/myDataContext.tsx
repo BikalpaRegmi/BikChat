@@ -33,7 +33,7 @@ export const MyDataProvider = ({ children }: any) => {
     
     useEffect(() => {
         getInfo();
-    }, [contract, account]);
+    }, [contract, account,myData]);
 
     return (<>
         <myDataContext.Provider value={myData}>
