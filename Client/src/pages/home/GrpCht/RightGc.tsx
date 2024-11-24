@@ -86,105 +86,99 @@ const RightGc = () => {
 
   return (
     <div className="col-span-2">
-      {
-grpId && !showMenu ?
-      
+      {grpId && !showMenu ? (
         <div className="w-full bg-gray-100 dark:bg-slate-900 neo-shadow p-6 space-y-6">
           {/* Profile Header */}
           <div className="flex items-center bg-slate-900 space-x-4">
-          
-
             <div className="w-12 h-12 rounded-full neo-shadow flex items-center justify-center">
               <img
-                src={grpData?.gcPic == '' ? 'vite.png' : grpData?.gcPic}
+                src={grpData?.gcPic == "" ? "vite.png" : grpData?.gcPic}
                 className="rounded-full text-xl font-semibold text-gray-700 dark:text-gray-300"
                 alt="Partner"
               />
-              </div>
-              
-            <h1 className="text-2xl font-bold dark:text-gray-200">
-              {grpData?.chatName}
-              </h1>
-              <CiMenuKebab onClick={()=>setShowMenu(true)} className="cursor-pointer"/>
-          </div>
-              
+            </div>
 
-            {/* Messages */}
-            <div
-              className="h-96 overflow-y-auto neo-inset p-4 rounded-xl space-y-4"
-            >
-            {
-              allMessages.map((curval: MessageType) => {
-                return (
-                  <div
-                    key={curval.time}
-                    className={`flex gap-3 items-start ${
+            <h1 className="text-2xl font-bold bg-slate-900 dark:text-gray-200">
+              {grpData?.chatName}
+            </h1>
+            <CiMenuKebab
+              onClick={() => setShowMenu(true)}
+              className="cursor-pointer"
+            />{aayexi admin le pani name rah image change garna milne bana aaile u r not member vanira xa ani chat name ko input ma gaera enter garda matra handlesubmit triggred vaira xa tyo pani her ani last ma addMember bana ani finised}
+          </div>
+
+          {/* Messages */}
+          <div className="h-96 overflow-y-auto neo-inset p-4 rounded-xl space-y-4">
+            {allMessages.map((curval: MessageType) => {
+              return (
+                <div
+                  key={curval.time}
+                  className={`flex gap-3 items-start ${
+                    curval.sender.toLowerCase() === account?.toLowerCase()
+                      ? "justify-end"
+                      : "justify-start"
+                  }`}
+                >
+                  <img
+                    className={`h-9 cursor-pointer w-9 rounded-full ${
+                      curval.sender.toLowerCase() !== account?.toLowerCase()
+                        ? "bloc"
+                        : "hidden"
+                    }`}
+                    alt=""
+                    onClick={() => navigate(`/Profile/${curval.sender}`)}
+                    src={curval.pp!}
+                  />
+                  <i
+                    className={`text-slate-500 self-center text-[12px] ${
                       curval.sender.toLowerCase() === account?.toLowerCase()
-                        ? "justify-end"
-                        : "justify-start"
+                        ? "block"
+                        : "hidden"
                     }`}
                   >
-                    <img
-                      className={`h-9 cursor-pointer w-9 rounded-full ${
-                        curval.sender.toLowerCase() !== account?.toLowerCase()
-                          ? "bloc"
-                          : "hidden"
-                      }`}
-                      alt=""
-                      onClick={()=>navigate(`/Profile/${curval.sender}`)}
-                      src={curval.pp!}
-                    />
-                    <i
-                      className={`text-slate-500 self-center text-[12px] ${
-                        curval.sender.toLowerCase() === account?.toLowerCase()
-                          ? "block"
-                          : "hidden"
-                      }`}
-                    >
-                      {new Date(
-                        Number(curval.time) * 1000
-                      ).toLocaleTimeString()}
-                    </i>
-                    <p
-                      className={`text-sm py-1 px-5 rounded-md ${
-                        curval.sender.toLowerCase() === account?.toLowerCase()
-                          ? "bg-lime-950"
-                          : "bg-yellow-900"
-                      }`}
-                    >
-                      {curval.text}
-                    </p>
-                    <i
-                      className={`text-slate-500 mt-1 text-[12px] ${
-                        curval.sender.toLowerCase() !== account?.toLowerCase()
-                          ? "block"
-                          : "hidden"
-                      }`}
-                    >
-                      {new Date(
-                        Number(curval.time) * 1000
-                      ).toLocaleTimeString()}
-                    </i>
-                  </div>
-                );
-              })}
-              
-                <div />
+                    {new Date(Number(curval.time) * 1000).toLocaleTimeString()}
+                  </i>
+                  <p
+                    className={`text-sm py-1 px-5 rounded-md ${
+                      curval.sender.toLowerCase() === account?.toLowerCase()
+                        ? "bg-lime-950"
+                        : "bg-yellow-900"
+                    }`}
+                  >
+                    {curval.text}
+                  </p>
+                  <i
+                    className={`text-slate-500 mt-1 text-[12px] ${
+                      curval.sender.toLowerCase() !== account?.toLowerCase()
+                        ? "block"
+                        : "hidden"
+                    }`}
+                  >
+                    {new Date(Number(curval.time) * 1000).toLocaleTimeString()}
+                  </i>
                 </div>
-            
+              );
+            })}
+
+            <div />
+          </div>
+
           {/* Input Field */}
           <div className="flex items-center space-x-4">
             <div className="flex-grow">
-              <input 
-                  type="text"
-                  value={message}
-                  onChange={(e:React.ChangeEvent<HTMLInputElement>)=>setMessage(e.target.value)}
+              <input
+                type="text"
+                value={message}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setMessage(e.target.value)
+                }
                 placeholder="Type your message..."
                 className="w-full p-4 rounded-xl neo-inset bg-transparent text-gray-700 dark:text-gray-300 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none"
               />
             </div>
             <button
-            onClick={addMessage}  className="p-4 rounded-xl neo-shadow neo-button focus:outline-none"
+              onClick={addMessage}
+              className="p-4 rounded-xl neo-shadow neo-button focus:outline-none"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -201,11 +195,17 @@ grpId && !showMenu ?
                 />
               </svg>
             </button>
-          
           </div>
         </div>
-          : grpId && <Menu setShowMenu={setShowMenu} grpData={ grpData!} />
-      }
+      ) : (
+        grpId && (
+          <Menu
+            setShowMenu={setShowMenu}
+            grpData={grpData!}
+            refreshPg={getGroupData}
+          />
+        )
+      )}
     </div>
   );
 }

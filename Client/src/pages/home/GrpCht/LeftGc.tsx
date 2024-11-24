@@ -32,7 +32,8 @@ const LeftGC: React.FC<Props> = ({ setIsGrp }) => {
   const getAllGroupChats = async () => {
     try {
       const res: GroupChatType[] = await contract?.getAllGroupChats();
-      setAllGroups(res);
+      const newRes: GroupChatType[] = res.filter((curval) => curval.id !== '');
+      setAllGroups(newRes);
     } catch (error) {
       console.log(error)
     }
@@ -72,9 +73,9 @@ const LeftGC: React.FC<Props> = ({ setIsGrp }) => {
             +
           </p>
           <div className=" h-[455px] overflow-scroll">
-          { allGroups.length>0 ? allGroups?.map((curval: GroupChatType) => {
+          { allGroups.length>0 ? allGroups?.map((curval: GroupChatType , key) => {
             return (
-                <div key={curval.id} onClick={()=>navigate(`/?grpOf=${curval.id}`)} className="flex cursor-pointer hover:border-2 border-lime-600 items-center space-x-4 p-4 rounded-lg neo-shadow">
+                <div key={key} onClick={()=>navigate(`/?grpOf=${curval.id}`)} className="flex cursor-pointer hover:border-2 border-lime-600 items-center space-x-4 p-4 rounded-lg neo-shadow">
                   <div className="w-12 h-12  rounded-full neo-inset flex items-center justify-center">
                     <img
                       src={
@@ -98,7 +99,7 @@ const LeftGC: React.FC<Props> = ({ setIsGrp }) => {
           </div>
         </div>
       </div>
-          <CreateGroup open={open} setOpen={setOpen} />
+      <CreateGroup open={open} setOpen={setOpen} refreshGroup={getAllGroupChats} />
     </div>
   );
 }

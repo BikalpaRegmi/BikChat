@@ -7,7 +7,8 @@ import "react-toastify/dist/ReactToastify.css";
   
 interface Props {
     open: boolean;
-    setOpen :React.Dispatch<SetStateAction<boolean>>
+  setOpen: React.Dispatch<SetStateAction<boolean>>
+  refreshGroup : ()=>void
 }
 
 interface DataType {
@@ -17,22 +18,24 @@ interface DataType {
   image: string | null;
 }
 
-const CreateGroup: React.FC<Props> = ({ open, setOpen }) => {
+const CreateGroup: React.FC<Props> = ({ open, setOpen ,refreshGroup}) => {
     const [contacts, setContacts] = useState<DataType[]>();
     const [toAdd, setToAdd] = useState<string[]>([]);
     const { contract, account } = useEthereum();
     const navigate = useNavigate();
 
     const getAllContacts = async () => {
-        try {
-            const res = await contract?.getAllProfiles();
-
-            const myContacts: DataType[] = [];
-            for (const profile of res) {
-                const isContact: DataType = await contract?.contacts(account, profile.id);
-                if (isContact) myContacts.push(profile);
-            }
-            setContacts(myContacts);
+      try {
+        if (contract) {
+            
+          const res = await contract?.getAllProfiles();
+          const myContacts: DataType[] = [];
+          for (const profile of res) {
+            const isContact: DataType = await contract?.contacts(account, profile.id);
+            if (isContact) myContacts.push(profile);
+          }
+          setContacts(myContacts);
+        }
         } catch (error) {
             console.log(error)
         }
@@ -56,7 +59,8 @@ const CreateGroup: React.FC<Props> = ({ open, setOpen }) => {
                 const transaction: any = await contract?.createGroupChat(toAdd, `You and ${toAdd.length} other`, Date.now().toString());
                 await transaction.wait();
                 toast("Creating group plz wait");
-                setOpen(false); 
+              setOpen(false); 
+              refreshGroup();
             }
         } catch (error) {
             console.log(error);
