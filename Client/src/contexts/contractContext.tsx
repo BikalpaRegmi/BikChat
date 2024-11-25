@@ -33,7 +33,7 @@ export const EthereumContextProvider = ({ children }: any) => {
   });
 
    const template = async () => {
-     const contractAddress = "0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9";
+     const contractAddress = "0x851356ae760d987E095750cCeb3bC6014560891C";
      const contractAbi = abi.abi;
 
      if (window.ethereum) {

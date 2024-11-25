@@ -5,7 +5,6 @@ import { CiMenuKebab } from "react-icons/ci";
 import Menu from "./menu";
 import { GrAttachment } from "react-icons/gr";
 import axios from "axios";
-
 interface GroupChatType {
   id: string;
   chatName: string;
