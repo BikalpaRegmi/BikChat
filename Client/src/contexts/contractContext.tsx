@@ -5,7 +5,7 @@ import {
   SetStateAction,
   useContext,
   useEffect,
-  useState,
+  useState, 
 } from "react";
 import abi from "../bytecode/abi.json";
 
@@ -33,7 +33,7 @@ export const EthereumContextProvider = ({ children }: any) => {
   });
 
    const template = async () => {
-     const contractAddress = "0x851356ae760d987E095750cCeb3bC6014560891C";
+     const contractAddress = "0x906650Dde866C59Cfe529c481B90A70776b8DB33";
      const contractAbi = abi.abi;
 
      if (window.ethereum) {
