@@ -36,7 +36,12 @@ interface memberType{
     id:string,
 }
 
-
+interface addMemberType{
+    image: string,
+    name: string,
+    id: string,
+    description:string,
+}
 
 const Menu: React.FC<Props> = ({ setShowMenu, grpData,refreshPg }) => {
     const [members, setMembers] = useState<memberType[]>();
@@ -48,6 +53,24 @@ const Menu: React.FC<Props> = ({ setShowMenu, grpData,refreshPg }) => {
     const [toEdit, setToEdit] = useState<string>(grpData.chatName);
     const FileRef = useRef<null | HTMLInputElement>(null);
     const [preview, setPreview] = useState<string>('');
+    const [contacts , setContacts] = useState<addMemberType[]>()
+
+    const getAllContacts = async() => {
+        try {
+            const res:addMemberType[] = await contract?.getAllProfiles();
+            const myContacts: addMemberType[] = [];
+            
+            for (const profile of res) {
+                const isContact: boolean = await contract?.contacts(account, profile.id);
+                if (isContact) myContacts.push(profile);
+            }
+            const contactsNotAdded = myContacts.filter((curval: addMemberType) => !grpData.members.includes(curval.id));
+            setContacts(contactsNotAdded);
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
     const allMembers = async() => {
         try {
@@ -117,7 +140,20 @@ const Menu: React.FC<Props> = ({ setShowMenu, grpData,refreshPg }) => {
         allMembers();
     }, [grpData]);
 
-    
+    const handleAddMember = async(id:string) => {
+        try {
+            await contract?.addMember(id, grpData.id);
+            toast("added member sucessfully");
+            getAllContacts();
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    useEffect(() => {
+        getAllContacts();
+    }, [showAdd ]);
+
         const handleSubmit = async() => {
             try {
                 const formData: FormData = new FormData();
@@ -159,7 +195,6 @@ const Menu: React.FC<Props> = ({ setShowMenu, grpData,refreshPg }) => {
                       );
 }
 
-
                 refreshPg();
                 
             } catch (error) {
@@ -197,19 +232,25 @@ const Menu: React.FC<Props> = ({ setShowMenu, grpData,refreshPg }) => {
       </span>
       <div className=" flex relative flex-col">
         <span className="self-center flex">
-          {!isEditing ? (
+                  {!isEditing ? (
+                      <a href={grpData.gcPic} target="_blank">
+                          
             <img
               className="rounded-full  w-36"
               src={grpData.gcPic === "" ? "vite.png" : grpData.gcPic}
               alt=""
-            />
+                         
+              />
+              </a>
           ) : (
             <>
               <h1
+                
                 onClick={() => FileRef.current?.click()}
                 className={`text-9xl mb-3 w-36 h-36 cursor-pointer border-2 ${
                   preview === "" ? "block" : "hidden"
                 } rounded-full text-center`}
+                
               >
                 +
               </h1>
@@ -223,10 +264,11 @@ const Menu: React.FC<Props> = ({ setShowMenu, grpData,refreshPg }) => {
             </>
           )}
           <MdModeEditOutline
-            onClick={handleEdit}
-            title="Edit"
-            className="justify-right text-xl cursor-pointer  text-right"
-          />
+                      onClick={handleEdit}
+                      title="Edit"
+                      className={`justify-right text-xl cursor-pointer ${preview ? 'hidden' : 'block'} text-right`}
+                  />
+                  <button onClick={handleSubmit} className={`bg-green-500 text-black h-9 px-1 rounded-3xl ${preview ? 'block':'hidden'}`}>select</button>
           <input
             type="file"
             ref={FileRef}
@@ -237,8 +279,6 @@ const Menu: React.FC<Props> = ({ setShowMenu, grpData,refreshPg }) => {
                 setPreview(URL.createObjectURL(selectedFile));
               }
             }}
-          
-            
             className="hidden"
           />
         </span>
@@ -250,7 +290,7 @@ const Menu: React.FC<Props> = ({ setShowMenu, grpData,refreshPg }) => {
             name="name"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setToEdit(e.target.value)
-            } 
+            }
             onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
               if (e.key === "Enter") {
                 e.preventDefault();
@@ -272,16 +312,26 @@ const Menu: React.FC<Props> = ({ setShowMenu, grpData,refreshPg }) => {
         </button>
 
         {showAdd ? (
-          <div className="h-32 overflow-scroll ">
-            <ul className="flex gap-3  mx-auto mt-1  w-64">
+                  <div className="h-32 overflow-scroll ">
+                      {
+                   contacts &&  contacts?.length>0 ? contacts?.map((curval:addMemberType)=>{
+                             return(
+                                 <>
+                                 
+                          <ul key={curval.id} className="flex gap-3  mx-auto mt-1  w-64">
               <li>
-                <img className="h-9   w-9 rounded-full" src="logo.png" alt="" />
+                <img className="h-9  w-9 rounded-full" src={curval.image} alt="" />
               </li>
-              <li className="text-lg  self-center">Bikalpa Regmi</li>
-              <li className="text-2xl hover:bg-lime-800 rounded-full cursor-pointer px-2">
+                                         <li className="text-lg  self-center">{ curval.name}</li>
+              <li onClick={()=>handleAddMember(curval.id)} className="text-2xl hover:bg-lime-800 rounded-full cursor-pointer px-2">
                 +
               </li>
-            </ul>
+                      </ul>
+                                 </>
+                             )
+                         }) : <p className="text-center">all of ur contacts are added already</p>
+            }
+                      
           </div>
         ) : (
           ""

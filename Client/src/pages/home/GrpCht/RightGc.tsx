@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEthereum } from "../../../contexts/contractContext";
 import { CiMenuKebab } from "react-icons/ci";
 import Menu from "./menu";
+import { GrAttachment } from "react-icons/gr";
+import axios from "axios";
 
 interface GroupChatType {
   id: string;
@@ -30,6 +32,9 @@ const RightGc = () => {
   const [allMessages, setAllMessages] = useState<MessageType[]>([]);
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState<boolean>(false);
+  const FileRef = useRef<null | HTMLInputElement>(null);
+  const [preview, setPreview] = useState<string>('');
+  const [file, setFile] = useState<File>();
 
   const getGroupData = async () => {
     try {
@@ -73,6 +78,26 @@ const RightGc = () => {
         await res.wait();
         setMessage('');
         getAllMessage();
+      } else if (file) {
+        const formData: FormData = new FormData();
+        if (file != null) formData.append('file', file);
+
+        if (file) {
+          const res: any = await axios.post(
+            "https://api.pinata.cloud/pinning/pinFileToIPFS",
+            formData,
+            {
+              headers: {
+                pinata_api_key: import.meta.env.VITE_Pinata_api_key,
+                pinata_secret_api_key: import.meta.env.VITE_Pinata_secret_api_key,
+              },
+            }
+          );
+          const imgUrl: string = "https://gateway.pinata.cloud/ipfs/" + res.data.IpfsHash;
+                 await contract?.addMessage(imgUrl, grpId);
+          getAllMessage();
+          setPreview('');
+        }
       }
     } catch (error) {
       console.log(error)
@@ -97,14 +122,13 @@ const RightGc = () => {
                 alt="Partner"
               />
             </div>
-
             <h1 className="text-2xl font-bold bg-slate-900 dark:text-gray-200">
               {grpData?.chatName}
             </h1>
             <CiMenuKebab
               onClick={() => setShowMenu(true)}
               className="cursor-pointer"
-            />{aayexi admin le pani name rah image change garna milne bana aaile u r not member vanira xa ani chat name ko input ma gaera enter garda matra handlesubmit triggred vaira xa tyo pani her ani last ma addMember bana ani finised}
+            />{" "}
           </div>
 
           {/* Messages */}
@@ -122,7 +146,7 @@ const RightGc = () => {
                   <img
                     className={`h-9 cursor-pointer w-9 rounded-full ${
                       curval.sender.toLowerCase() !== account?.toLowerCase()
-                        ? "bloc"
+                        ? "block"
                         : "hidden"
                     }`}
                     alt=""
@@ -138,15 +162,24 @@ const RightGc = () => {
                   >
                     {new Date(Number(curval.time) * 1000).toLocaleTimeString()}
                   </i>
-                  <p
-                    className={`text-sm py-1 px-5 rounded-md ${
-                      curval.sender.toLowerCase() === account?.toLowerCase()
-                        ? "bg-lime-950"
-                        : "bg-yellow-900"
-                    }`}
-                  >
-                    {curval.text}
-                  </p>
+                  {curval.text.startsWith("http") 
+                   ? (
+                    <img
+                      src={curval.text}
+                      alt="Sent image"
+                      className="max-w-xs rounded-md"
+                    />
+                  ) : (
+                    <p
+                      className={`text-sm py-1 px-5 rounded-md ${
+                        curval.sender.toLowerCase() === account?.toLowerCase()
+                          ? "bg-lime-950"
+                          : "bg-yellow-900"
+                      }`}
+                    >
+                      {curval.text}
+                    </p>
+                  )}
                   <i
                     className={`text-slate-500 mt-1 text-[12px] ${
                       curval.sender.toLowerCase() !== account?.toLowerCase()
@@ -162,7 +195,19 @@ const RightGc = () => {
 
             <div />
           </div>
-
+          <span
+            className={`absolute bottom-20 right-9 ${
+              preview == "" ? "hidden" : "block"
+            }`}
+          >
+            <b
+              onClick={() => setPreview("")}
+              className="hover:border-2 cursor-pointer px-1 rounded-full "
+            >
+              x
+            </b>
+            <img src={preview} alt="" className="  w-36" />
+          </span>
           {/* Input Field */}
           <div className="flex items-center space-x-4">
             <div className="flex-grow">
@@ -172,10 +217,30 @@ const RightGc = () => {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setMessage(e.target.value)
                 }
+                disabled={preview==''?false:true}
                 placeholder="Type your message..."
                 className="w-full p-4 rounded-xl neo-inset bg-transparent text-gray-700 dark:text-gray-300 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none"
               />
             </div>
+
+            <input
+              type="file"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const selectedFile = e.target.files && e.target.files[0];
+                if (selectedFile) {
+                  setFile(selectedFile);
+                  setPreview(URL.createObjectURL(selectedFile));
+                }
+              }}
+              ref={FileRef}
+              className="hidden"
+            />
+            <GrAttachment
+              onClick={() => FileRef?.current?.click()}
+              className={`text-xl cursor-pointer ${
+                message && message.length > 0 ? "hidden" : "block"
+              }`}
+            />
             <button
               onClick={addMessage}
               className="p-4 rounded-xl neo-shadow neo-button focus:outline-none"

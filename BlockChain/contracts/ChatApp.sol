@@ -210,7 +210,9 @@ GroupChat storage gc = groupChats[_id];
 bool isMember = false ;
 
 for(uint i=0 ; i<gc.members.length ; i++){
- if(gc.members[i]==msg.sender) isMember = true;
+ if(gc.members[i]==msg.sender ||gc.admin==msg.sender) {
+    isMember = true;
+ }
 }
 require(isMember , "U need to be member to edit grp info");
 if(keccak256(bytes(gc.chatName)) != keccak256(bytes(_chtName))){
