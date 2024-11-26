@@ -1,4 +1,5 @@
-*.env
+SecretKeys
+
 # Logs
 logs
 *.log
